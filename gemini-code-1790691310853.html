@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MUSIC JOURNEY | SMAN 1 Pangalengan</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        @media (min-width: 640px) {
+            .app-container {
+                max-width: 420px;
+                height: 90vh;
+                border-radius: 24px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #ffffff;
+            }
+        }
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .waveform { display: flex; align-items: center; justify-content: center; gap: 4px; height: 40px; }
+        .bar { width: 6px; background: linear-gradient(to top, #ec4899, #a855f7); border-radius: 99px; animation: bounce 1.2s ease-in-out infinite; }
+        .bar:nth-child(1) { animation-delay: 0.0s; height: 10px; }
+        .bar:nth-child(2) { animation-delay: 0.2s; height: 25px; }
+        .bar:nth-child(3) { animation-delay: 0.4s; height: 40px; }
+        .bar:nth-child(4) { animation-delay: 0.2s; height: 20px; }
+        .bar:nth-child(5) { animation-delay: 0.0s; height: 15px; }
+        @keyframes bounce { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
+        .glass-nav { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(241, 245, 249, 1); }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { pink: '#ec4899', lavender: '#a855f7', dark: '#1e293b', light: '#f8fafc', gray: '#64748b' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        const initialCheckpoints = [
+            { id: 'v1', divisi: 'Vokal', level: 1, nama: 'Mengikuti latihan vokal pertama', urutan: 1 },
+            { id: 'v2', divisi: 'Vokal', level: 1, nama: 'Menguasai teknik pernapasan dasar', urutan: 2 },
+            { id: 'v3', divisi: 'Vokal', level: 1, nama: 'Menguasai pemanasan dan vocal warm-up dasar', urutan: 3 },
+            { id: 'v4', divisi: 'Vokal', level: 1, nama: 'Mampu menyanyikan 3 lagu dengan baik', urutan: 4 },
+            { id: 'v5', divisi: 'Vokal', level: 1, nama: 'Berani menyanyikan lagu di depan anggota lain', urutan: 5 },
+            { id: 'v6', divisi: 'Vokal', level: 2, nama: 'Mampu menjaga pitch dan tempo saat bernyanyi bersama', urutan: 6 },
+            { id: 'v7', divisi: 'Vokal', level: 2, nama: 'Mampu melakukan harmonisasi vokal sederhana', urutan: 7 },
+            { id: 'v8', divisi: 'Vokal', level: 2, nama: 'Mengikuti latihan persiapan performance', urutan: 8 },
+            { id: 'v9', divisi: 'Vokal', level: 2, nama: 'Tampil dalam kegiatan/performance sekolah', urutan: 9 },
+            { id: 'v10', divisi: 'Vokal', level: 2, nama: 'Berpartisipasi dalam satu proyek musik divisi', urutan: 10 },
+            { id: 'v11', divisi: 'Vokal', level: 3, nama: 'Membuat melodi vokal sederhana', urutan: 11 },
+            { id: 'v12', divisi: 'Vokal', level: 3, nama: 'Membuat harmonisasi vokal untuk sebuah lagu', urutan: 12 },
+            { id: 'v13', divisi: 'Vokal', level: 3, nama: 'Membawakan lagu dengan interpretasi dan ekspresi sendiri', urutan: 13 },
+            { id: 'v14', divisi: 'Vokal', level: 3, nama: 'Membantu membuat aransemen vokal sebuah lagu', urutan: 14 },
+            { id: 'v15', divisi: 'Vokal', level: 3, nama: 'Berkontribusi pada karya musik original/aransemen Modern Musik', urutan: 15 },
+            { id: 'g1', divisi: 'Gitar', level: 1, nama: 'Mengikuti latihan gitar pertama', urutan: 1 },
+            { id: 'g2', divisi: 'Gitar', level: 1, nama: 'Menguasai chord dasar', urutan: 2 },
+            { id: 'g3', divisi: 'Gitar', level: 1, nama: 'Menguasai perpindahan chord dengan lancar', urutan: 3 },
+            { id: 'g4', divisi: 'Gitar', level: 1, nama: 'Mampu memainkan 3 lagu', urutan: 4 },
+            { id: 'g5', divisi: 'Gitar', level: 1, nama: 'Berani memainkan gitar di depan anggota lain', urutan: 5 },
+            { id: 'g6', divisi: 'Gitar', level: 2, nama: 'Menguasai teknik strumming dasar', urutan: 6 },
+            { id: 'g7', divisi: 'Gitar', level: 2, nama: 'Mampu memainkan gitar mengikuti tempo', urutan: 7 },
+            { id: 'g8', divisi: 'Gitar', level: 2, nama: 'Mampu bermain bersama anggota divisi lain', urutan: 8 },
+            { id: 'g9', divisi: 'Gitar', level: 2, nama: 'Mengikuti latihan persiapan performance', urutan: 9 },
+            { id: 'g10', divisi: 'Gitar', level: 2, nama: 'Tampil dalam kegiatan/performance sekolah', urutan: 10 },
+            { id: 'g11', divisi: 'Gitar', level: 3, nama: 'Membuat variasi strumming sederhana', urutan: 11 },
+            { id: 'g12', divisi: 'Gitar', level: 3, nama: 'Membuat melodi gitar sederhana', urutan: 12 },
+            { id: 'g13', divisi: 'Gitar', level: 3, nama: 'Membuat intro atau outro lagu', urutan: 13 },
+            { id: 'g14', divisi: 'Gitar', level: 3, nama: 'Membantu membuat aransemen gitar sebuah lagu', urutan: 14 },
+            { id: 'g15', divisi: 'Gitar', level: 3, nama: 'Berkontribusi pada karya musik original/aransemen Modern Musik', urutan: 15 },
+            { id: 'b1', divisi: 'Bass', level: 1, nama: 'Mengikuti latihan bass pertama', urutan: 1 },
+            { id: 'b2', divisi: 'Bass', level: 1, nama: 'Mengenal posisi dan nama nada dasar pada bass', urutan: 2 },
+            { id: 'b3', divisi: 'Bass', level: 1, nama: 'Menguasai bassline sederhana', urutan: 3 },
+            { id: 'b4', divisi: 'Bass', level: 1, nama: 'Mampu memainkan 3 lagu', urutan: 4 },
+            { id: 'b5', divisi: 'Bass', level: 1, nama: 'Mampu menjaga tempo saat bermain bass', urutan: 5 },
+            { id: 'b6', divisi: 'Bass', level: 2, nama: 'Mampu mengikuti drum dan menjaga groove', urutan: 6 },
+            { id: 'b7', divisi: 'Bass', level: 2, nama: 'Mampu memainkan satu lagu secara penuh', urutan: 7 },
+            { id: 'b8', divisi: 'Bass', level: 2, nama: 'Mampu bermain bersama gitar dan drum', urutan: 8 },
+            { id: 'b9', divisi: 'Bass', level: 2, nama: 'Mengikuti latihan persiapan performance', urutan: 9 },
+            { id: 'b10', divisi: 'Bass', level: 2, nama: 'Tampil dalam kegiatan/performance sekolah', urutan: 10 },
+            { id: 'b11', divisi: 'Bass', level: 3, nama: 'Membuat bassline sederhana', urutan: 11 },
+            { id: 'b12', divisi: 'Bass', level: 3, nama: 'Membuat variasi bassline sesuai bagian lagu', urutan: 12 },
+            { id: 'b13', divisi: 'Bass', level: 3, nama: 'Membantu menentukan groove sebuah lagu', urutan: 13 },
+            { id: 'b14', divisi: 'Bass', level: 3, nama: 'Membantu membuat aransemen bass', urutan: 14 },
+            { id: 'b15', divisi: 'Bass', level: 3, nama: 'Berkontribusi pada karya musik original/aransemen Modern Musik', urutan: 15 },
+            { id: 'd1', divisi: 'Drum', level: 1, nama: 'Mengikuti latihan drum pertama', urutan: 1 },
+            { id: 'd2', divisi: 'Drum', level: 1, nama: 'Menguasai basic beat', urutan: 2 },
+            { id: 'd3', divisi: 'Drum', level: 1, nama: 'Menguasai koordinasi tangan dan kaki dasar', urutan: 3 },
+            { id: 'd4', divisi: 'Drum', level: 1, nama: 'Mampu memainkan 3 lagu', urutan: 4 },
+            { id: 'd5', divisi: 'Drum', level: 1, nama: 'Mampu menjaga tempo secara konsisten', urutan: 5 },
+            { id: 'd6', divisi: 'Drum', level: 2, nama: 'Mampu memainkan satu lagu secara penuh', urutan: 6 },
+            { id: 'd7', divisi: 'Drum', level: 2, nama: 'Mampu mengikuti perubahan bagian lagu', urutan: 7 },
+            { id: 'd8', divisi: 'Drum', level: 2, nama: 'Mampu bermain bersama gitar dan bass', urutan: 8 },
+            { id: 'd9', divisi: 'Drum', level: 2, nama: 'Mengikuti latihan persiapan performance', urutan: 9 },
+            { id: 'd10', divisi: 'Drum', level: 2, nama: 'Tampil dalam kegiatan/performance sekolah', urutan: 10 },
+            { id: 'd11', divisi: 'Drum', level: 3, nama: 'Membuat variasi drum beat sederhana', urutan: 11 },
+            { id: 'd12', divisi: 'Drum', level: 3, nama: 'Membuat fill-in sederhana', urutan: 12 },
+            { id: 'd13', divisi: 'Drum', level: 3, nama: 'Menentukan pola drum untuk sebuah lagu', urutan: 13 },
+            { id: 'd14', divisi: 'Drum', level: 3, nama: 'Membantu membuat aransemen drum', urutan: 14 },
+            { id: 'd15', divisi: 'Drum', level: 3, nama: 'Berkontribusi pada karya musik original/aransemen Modern Musik', urutan: 15 },
+            { id: 'dc1', divisi: 'Dance', level: 1, nama: 'Mengikuti latihan dance pertama', urutan: 1 },
+            { id: 'dc2', divisi: 'Dance', level: 1, nama: 'Menguasai basic movement', urutan: 2 },
+            { id: 'dc3', divisi: 'Dance', level: 1, nama: 'Menguasai basic rhythm dan musicality', urutan: 3 },
+            { id: 'dc4', divisi: 'Dance', level: 1, nama: 'Menghafal satu koreografi sederhana', urutan: 4 },
+            { id: 'dc5', divisi: 'Dance', level: 1, nama: 'Berani melakukan performance di depan anggota lain', urutan: 5 },
+            { id: 'dc6', divisi: 'Dance', level: 2, nama: 'Mampu mengikuti koreografi dengan konsisten', urutan: 6 },
+            { id: 'dc7', divisi: 'Dance', level: 2, nama: 'Mampu menyesuaikan gerakan dengan tempo musik', urutan: 7 },
+            { id: 'dc8', divisi: 'Dance', level: 2, nama: 'Mengikuti latihan kelompok', urutan: 8 },
+            { id: 'dc9', divisi: 'Dance', level: 2, nama: 'Berpartisipasi dalam proyek performance', urutan: 9 },
+            { id: 'dc10', divisi: 'Dance', level: 2, nama: 'Tampil dalam kegiatan/performance sekolah', urutan: 10 },
+            { id: 'dc11', divisi: 'Dance', level: 3, nama: 'Membuat kombinasi gerakan sederhana', urutan: 11 },
+            { id: 'dc12', divisi: 'Dance', level: 3, nama: 'Membuat bagian koreografi untuk sebuah lagu', urutan: 12 },
+            { id: 'dc13', divisi: 'Dance', level: 3, nama: 'Membantu menentukan konsep performance', urutan: 13 },
+            { id: 'dc14', divisi: 'Dance', level: 3, nama: 'Membantu membuat koreografi kelompok', urutan: 14 },
+            { id: 'dc15', divisi: 'Dance', level: 3, nama: 'Berkontribusi pada karya/performance original Modern Musik', urutan: 15 }
+        ];
+
+        const getStorageData = (key, defaultVal) => {
+            try {
+                const item = localStorage.getItem('mj_' + key);
+                return item ? JSON.parse(item) : defaultVal;
+            } catch(e) { return defaultVal; }
+        };
+
+        const setStorageData = (key, val) => {
+            try {
+                localStorage.setItem('mj_' + key, JSON.stringify(val));
+                window.dispatchEvent(new Event('storage-updated'));
+            } catch(e) {}
+        };
+
+        const initLocalStorage = async () => {
+            let users = getStorageData('users', []);
+            if (!users.some(u => u.username === 'adminmodernmusik')) {
+                const msgBuffer = new TextEncoder().encode('modernmusiksmansa');
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const adminHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                users.push({
+                    id: 'admin_user_id_1',
+                    nama_lengkap: 'Admin Modern Musik',
+                    username: 'adminmodernmusik',
+                    password_hash: adminHash,
+                    role: 'admin',
+                    divisi: 'Semua',
+                    created_at: Date.now()
+                });
+                setStorageData('users', users);
+            }
+            if (!localStorage.getItem('mj_checkpoints')) {
+                setStorageData('checkpoints', initialCheckpoints);
+            }
+        };
+        initLocalStorage();
+
+        window.hashPassword = async (msg) => {
+            const msgBuffer = new TextEncoder().encode(msg);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        };
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const icons = {
+                CheckCircle2: <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>,
+                AlertCircle: <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14h-2v-2h2zm0-4h-2V7h2z"/>,
+                ArrowLeft: <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/>,
+                User: <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>,
+                AtSign: <path d="M12 2a10 10 0 1 0 10 10v1a3 3 0 0 1-3 3h-1a7 7 0 1 1-2.05-4.95L17 12a5 5 0 1 0 1 3.05V13a5 5 0 0 0-5-5 5 5 0 0 0-5 5 5 5 0 0 0 5 5h1a1 1 0 0 0 1-1v-1.15A9 9 0 0 1 12 2zm0 13a3 3 0 1 1 3-3 3 3 0 0 1-3 3z"/>,
+                Lock: <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0-2-.9-2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>,
+                Eye: <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3 z"/>,
+                EyeOff: <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.17C10.74 7.13 11.36 7 12 7zM2 4.27l2.28 2.28.46.46A11.804 11.804 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.4-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2z"/>,
+                Loader2: <path d="M12 2v4a6 6 0 0 0-6 6h4a2 2 0 0 1 2-2V2z"/>,
+                Home: <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>,
+                Target: <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-13a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3z"/>,
+                Search: <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>,
+                Bell: <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>,
+                BellOff: <path d="M20 18.69L17.31 16H18v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68c-.34.08-.67.19-.99.32L4.31 3 3 4.31l15.69 15.69L20 18.69zM12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm-6-8.69V16H4v-1l2-2z"/>,
+                Music: <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>,
+                ArrowRight: <path d="M10 17l5-5-5-5v10z"/>,
+                Plus: <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>,
+                Edit2: <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>,
+                Trash2: <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>,
+                Info: <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/>,
+                Users: <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>,
+                UserPlus: <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>,
+                LogOut: <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>,
+                Camera: <path d="M12 9c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0-5c-3.87 0-7 3.13-7 7 0 2.38 1.19 4.47 3 5.74V20h8v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>,
+                Award: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
+                Zap: <path d="M7 2v11h3v9l7-12h-4l4-8z"/>,
+                Heart: <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>,
+                LayoutDashboard: <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>,
+                ListChecks: <path d="M3 5h2V3H3v2zm0 8h2v-2H3v2zm0 8h2v-2H3v2zM7 5h14V3H7v2zm0 8h14v-2H7v2zm0 8h14v-2H7v2z"/>,
+                CheckCircle: <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>,
+                Settings: <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.03 2.18 13.82 2 13.5 2h-4c-.32 0-.53.18-.57.49l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.31.25.49.57.49h4c.32 0 .53-.18.57-.49l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>,
+                ChevronRight: <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>,
+                Clock: <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>,
+                X: <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            };
+            return <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={`inline-block shrink-0 ${className}`}>{icons[name] || icons['Info']}</svg>;
+        };
+
+        const Toast = ({ message, type = 'success', onClose }) => {
+            useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
+            return (
+                <div className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-500'} text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 slide-up text-sm font-medium`}>
+                    {type === 'success' ? <Icon name="CheckCircle2" size={18} /> : <Icon name="AlertCircle" size={18} />} {message}
+                </div>
+            );
+        };
+
+        const Button = ({ children, onClick, variant = 'primary', className = "", disabled = false, type = "button" }) => {
+            const variants = {
+                primary: "bg-brand-dark text-white hover:bg-slate-700 shadow-md",
+                secondary: "bg-white text-brand-dark border border-slate-200 hover:bg-slate-50",
+                accent: "bg-brand-pink text-white shadow-md shadow-pink-200",
+                danger: "bg-red-50 text-red-600 hover:bg-red-100",
+                ghost: "bg-transparent text-slate-500 hover:bg-slate-100"
+            };
+            return <button type={type} onClick={onClick} disabled={disabled} className={`w-full py-3.5 px-6 rounded-full font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${variants[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>{children}</button>;
+        };
+
+        const Input = ({ label, type = "text", value, onChange, placeholder, icon }) => (
+            <div className="space-y-1.5 w-full">
+                {label && <label className="block text-sm font-medium text-slate-700">{label}</label>}
+                <div className="relative">
+                    {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon name={icon} size={18} /></div>}
+                    <input type={type} value={value} onChange={onChange} placeholder={placeholder} className={`w-full bg-white border border-slate-200 rounded-2xl py-3.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-pink/25 ${icon ? 'pl-11' : ''}`} />
+                </div>
+            </div>
+        );
+
+        const Select = ({ label, value, onChange, options }) => (
+            <div className="space-y-1.5 w-full">
+                {label && <label className="block text-sm font-medium text-slate-700">{label}</label>}
+                <select value={value} onChange={onChange} className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 px-4 focus:outline-none focus:ring-2 focus:ring-brand-pink/25 appearance-none">
+                    <option value="" disabled>Pilih {label}</option>
+                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+            </div>
+        );
+
+        const Avatar = ({ src, name, size = "md" }) => {
+            const sizes = { sm: "w-8 h-8 text-xs", md: "w-12 h-12 text-sm", lg: "w-20 h-20 text-xl", xl: "w-28 h-28 text-2xl" };
+            return (
+                <div className={`rounded-full bg-gradient-to-br from-brand-pink/20 to-brand-lavender/20 flex items-center justify-center text-brand-dark font-bold overflow-hidden border border-slate-100 shrink-0 ${sizes[size]}`}>
+                    {src ? <img src={src} alt={name} className="w-full h-full object-cover" onError={(e)=>e.target.style.display='none'} /> : <span>{name ? name.substring(0, 2).toUpperCase() : "?"}</span>}
+                </div>
+            );
+        };
+
+        const ProgressBar = ({ percentage }) => (
+            <div className="w-full bg-slate-100 rounded-full overflow-hidden h-2.5">
+                <div className="h-full rounded-full bg-gradient-to-r from-brand-pink to-brand-lavender transition-all duration-500" style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}></div>
+            </div>
+        );
+
+        const Badge = ({ children, variant = "default" }) => {
+            const vars = { default: "bg-slate-100 text-slate-600 border-slate-200", pink: "bg-pink-50 text-pink-600 border-pink-100", purple: "bg-purple-50 text-purple-600 border-purple-100", success: "bg-emerald-50 text-emerald-600 border-emerald-100", warning: "bg-amber-50 text-amber-600 border-amber-100", danger: "bg-red-50 text-red-600 border-red-100" };
+            return <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${vars[variant] || vars.default}`}>{children}</span>;
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(() => getStorageData('current_user', null));
+            const [view, setView] = useState(() => getStorageData('current_view', user ? (user.role === 'admin' ? 'admin_dashboard' : 'dashboard') : 'welcome'));
+            const [toast, setToast] = useState(null);
+            const [allUsers, setAllUsers] = useState([]);
+            const [checkpoints, setCheckpoints] = useState([]);
+            const [submissions, setSubmissions] = useState([]);
+            const [follows, setFollows] = useState([]);
+            const [goalsMap, setGoalsMap] = useState({});
+            const [notifsMap, setNotifsMap] = useState({});
+
+            const showToast = (message, type = 'success') => setToast({ message, type });
+
+            const loadData = () => {
+                setAllUsers(getStorageData('users', []));
+                setCheckpoints(getStorageData('checkpoints', initialCheckpoints));
+                setSubmissions(getStorageData('submissions', []));
+                setFollows(getStorageData('follows', []));
+                setGoalsMap(getStorageData('goalsMap', {}));
+                setNotifsMap(getStorageData('notifsMap', {}));
+            };
+
+            useEffect(() => {
+                loadData();
+                const handleUpdate = () => loadData();
+                window.addEventListener('storage-updated', handleUpdate);
+                return () => window.removeEventListener('storage-updated', handleUpdate);
+            }, []);
+
+            const login = (userData) => {
+                setUser(userData);
+                setStorageData('current_user', userData);
+                const initView = userData.role === 'admin' ? 'admin_dashboard' : 'dashboard';
+                setView(initView);
+                setStorageData('current_view', initView);
+            };
+
+            const logout = () => {
+                setUser(null);
+                localStorage.removeItem('mj_current_user');
+                localStorage.removeItem('mj_current_view');
+                setView('welcome');
+            };
+
+            const navigate = (newView) => {
+                setView(newView);
+                setStorageData('current_view', newView);
+            };
+
+            return (
+                <div className="app-container shadow-2xl bg-white text-slate-800">
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                    
+                    <div className="scrollable-content no-scrollbar pb-24 relative">
+                        {view === 'welcome' && <WelcomeView onNavigate={navigate} />}
+                        {view === 'auth' && <AuthView onLogin={login} showToast={showToast} allUsers={allUsers} onBack={() => navigate('welcome')} />}
+                        
+                        {user && user.role === 'member' && (
+                            <>
+                                {view === 'dashboard' && <MemberDashboard user={user} navigate={navigate} allUsers={allUsers} checkpoints={checkpoints} notifsMap={notifsMap} />}
+                                {view === 'progress' && <ProgressView user={user} checkpoints={checkpoints} submissions={submissions} showToast={showToast} goalsMap={goalsMap} notifsMap={notifsMap} />}
+                                {view === 'find_friends' && <FindFriendsView user={user} allUsers={allUsers} navigate={navigate} follows={follows} notifsMap={notifsMap} showToast={showToast} />}
+                                {view === 'profile' && <MyProfileView user={user} logout={logout} showToast={showToast} navigate={navigate} follows={follows} checkpoints={checkpoints} allUsers={allUsers} />}
+                                {view === 'other_profile' && <OtherProfileView currentUser={user} targetUser={allUsers.find(u => u.id === window.targetUserId)} navigate={navigate} showToast={showToast} checkpoints={checkpoints} follows={follows} allUsers={allUsers} />}
+                                {view === 'notifications' && <NotificationsView user={user} navigate={navigate} notifsMap={notifsMap} />}
+                            </>
+                        )}
+
+                        {user && user.role === 'admin' && (
+                            <>
+                                {view === 'admin_dashboard' && <AdminDashboard allUsers={allUsers} checkpoints={checkpoints} />}
+                                {view === 'admin_members' && <AdminMembers allUsers={allUsers} navigate={navigate} />}
+                                {view === 'admin_checkpoints' && <AdminCheckpoints checkpoints={checkpoints} />}
+                                {view === 'admin_approvals' && <AdminApprovals submissions={submissions} allUsers={allUsers} showToast={showToast} notifsMap={notifsMap} />}
+                                {view === 'admin_profile' && <AdminProfile user={user} logout={logout} />}
+                                {view === 'admin_member_detail' && <AdminMemberDetail user={allUsers.find(u => u.id === window.targetUserId)} checkpoints={checkpoints} navigate={navigate} />}
+                            </>
+                        )}
+                    </div>
+
+                    {user && user.role === 'member' && !['notifications', 'other_profile'].includes(view) && <MemberBottomNav view={view} navigate={navigate} />}
+                    {user && user.role === 'admin' && !['admin_member_detail'].includes(view) && <AdminBottomNav view={view} navigate={navigate} />}
+                </div>
+            );
+        };
+
+        const WelcomeView = ({ onNavigate }) => (
+            <div className="h-full flex flex-col items-center justify-center p-8 bg-slate-50 text-center fade-in">
+                <div className="mb-12">
+                    <div className="waveform mb-8"><div className="bar"></div><div className="bar"></div><div className="bar"></div><div className="bar"></div><div className="bar"></div></div>
+                    <h1 className="text-3xl font-bold tracking-tight text-brand-dark mb-2">MUSIC JOURNEY</h1>
+                    <p className="text-sm font-medium text-slate-500 mb-6">Modern Musik — SMAN 1 Pangalengan</p>
+                    <p className="text-xl font-medium text-slate-700 italic">"Your musical journey starts here."</p>
+                </div>
+                <div className="w-full space-y-4"><Button onClick={() => onNavigate('auth')}>Masuk / Daftar</Button></div>
+            </div>
+        );
+
+        const AuthView = ({ onLogin, showToast, allUsers, onBack }) => {
+            const [mode, setMode] = useState('login');
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [confirmPassword, setConfirmPassword] = useState('');
+            const [nama, setNama] = useState('');
+            const [kelas, setKelas] = useState('');
+            const [divisi, setDivisi] = useState('');
+            const [showPass, setShowPass] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!username.trim() || !password.trim()) return showToast("Username dan password wajib diisi.", "error");
+                
+                const cleanUser = username.trim().toLowerCase();
+                const hashedPass = await window.hashPassword(password);
+                const currentUsers = getStorageData('users', allUsers);
+
+                if (mode === 'login') {
+                    const found = currentUsers.find(u => u.username === cleanUser && u.password_hash === hashedPass);
+                    if (!found) return showToast("Username atau password salah.", "error");
+                    onLogin(found);
+                } else {
+                    if (!nama || !kelas || !divisi) return showToast("Semua field wajib diisi.", "error");
+                    if (password !== confirmPassword) return showToast("Kata sandi tidak cocok.", "error");
+                    if (currentUsers.some(u => u.username === cleanUser)) return showToast("Username sudah digunakan.", "error");
+
+                    const newUser = {
+                        id: 'user_' + Date.now(),
+                        nama_lengkap: nama,
+                        kelas, divisi,
+                        username: cleanUser,
+                        password_hash: hashedPass,
+                        role: 'member',
+                        progress: [],
+                        badges: ['FIRST STEP'],
+                        created_at: Date.now()
+                    };
+                    const updatedUsers = [...currentUsers, newUser];
+                    setStorageData('users', updatedUsers);
+                    showToast("Akun berhasil dibuat!");
+                    onLogin(newUser);
+                }
+            };
+
+            return (
+                <div className="min-h-full flex flex-col p-6 bg-white fade-in">
+                    <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 mb-6 hover:bg-slate-100"><Icon name="ArrowLeft" size={20} /></button>
+                    <h2 className="text-2xl font-bold mb-2">{mode === 'login' ? 'Selamat Datang Kembali' : 'Mulai Perjalananmu'}</h2>
+                    <p className="text-slate-500 mb-8">{mode === 'login' ? 'Masuk untuk melanjutkan.' : 'Buat akun untuk melacak progress musikmu.'}</p>
+                    <form onSubmit={handleSubmit} className="space-y-4 flex-1">
+                        {mode === 'register' && (
+                            <>
+                                <Input label="Nama Lengkap" value={nama} onChange={e => setNama(e.target.value)} icon="User" placeholder="Dara Sabrina" />
+                                <div className="flex gap-4">
+                                    <Input label="Kelas" value={kelas} onChange={e => setKelas(e.target.value)} placeholder="XI-B1" />
+                                    <Select label="Divisi" value={divisi} onChange={e => setDivisi(e.target.value)} options={['Vokal', 'Gitar', 'Bass', 'Drum', 'Dance']} />
+                                </div>
+                            </>
+                        )}
+                        <Input label="Username" value={username} onChange={e => setUsername(e.target.value.replace(/\s/g, ''))} icon="AtSign" placeholder="username" />
+                        <div className="relative">
+                            <Input label="Kata Sandi" type={showPass ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} icon="Lock" placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-9 text-slate-400"><Icon name={showPass ? "EyeOff" : "Eye"} size={18} /></button>
+                        </div>
+                        {mode === 'register' && <Input label="Konfirmasi Kata Sandi" type={showPass ? "text" : "password"} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} icon="Lock" placeholder="••••••••" />}
+                        <div className="pt-6"><Button type="submit">{mode === 'login' ? 'Masuk' : 'Buat Akun'}</Button></div>
+                    </form>
+                    <div className="mt-8 text-center text-sm text-slate-500 pb-8">
+                        {mode === 'login' ? "Belum punya akun? " : "Sudah punya akun? "}
+                        <button onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="font-semibold text-brand-pink hover:underline">{mode === 'login' ? 'Buat Akun' : 'Masuk'}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const TopBar = ({ title, onBack, rightElement }) => (
+            <div className="flex items-center justify-between p-4 glass-nav sticky top-0 z-20">
+                {onBack ? <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600"><Icon name="ArrowLeft" size={24} /></button> : <div className="w-10"></div>}
+                <h1 className="text-lg font-semibold flex-1 text-center truncate px-2">{title}</h1>
+                <div className="w-10 flex justify-end">{rightElement}</div>
+            </div>
+        );
+
+        const MemberBottomNav = ({ view, navigate }) => {
+            const items = [{ id: 'dashboard', icon: 'Home', label: 'Home' }, { id: 'progress', icon: 'Target', label: 'Progress' }, { id: 'find_friends', icon: 'Search', label: 'Find' }, { id: 'profile', icon: 'User', label: 'Profile' }];
+            return (
+                <div className="absolute bottom-0 left-0 right-0 w-full glass-nav pb-safe pt-2 px-6 pb-4 sm:rounded-b-3xl z-30">
+                    <div className="flex justify-between items-center max-w-sm mx-auto">
+                        {items.map(item => (
+                            <button key={item.id} onClick={() => navigate(item.id)} className={`flex flex-col items-center gap-1 p-2 ${view === item.id ? 'text-brand-pink' : 'text-slate-400'}`}>
+                                <Icon name={item.icon} size={24} />
+                                <span className="text-[10px] font-medium">{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const MemberDashboard = ({ user, navigate, allUsers, checkpoints, notifsMap }) => {
+            const divisionCP = useMemo(() => checkpoints.filter(c => c.divisi === user.divisi), [checkpoints, user.divisi]);
+            const completedCount = (user.progress || []).filter(pid => divisionCP.some(c => c.id === pid)).length;
+            const percentage = divisionCP.length > 0 ? (completedCount / divisionCP.length) * 100 : 0;
+            const nextMission = divisionCP.find(c => !(user.progress || []).includes(c.id));
+
+            const myNotifs = notifsMap[user.id] || [];
+            const unreadCount = myNotifs.filter(n => !n.is_read).length;
+
+            const rankings = useMemo(() => {
+                return allUsers.filter(u => u.divisi === user.divisi && u.role === 'member').map(m => {
+                    const mComp = (m.progress || []).filter(pid => divisionCP.some(c => c.id === pid)).length;
+                    return { ...m, perc: divisionCP.length ? (mComp / divisionCP.length) * 100 : 0 };
+                }).sort((a,b) => b.perc - a.perc).slice(0, 5);
+            }, [allUsers, user.divisi, divisionCP]);
+
+            return (
+                <div className="fade-in pb-20">
+                    <div className="px-6 pt-8 pb-4 bg-gradient-to-br from-brand-pink/5 to-transparent flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold">Halo, {user.nama_lengkap.split(' ')[0]} 👋</h1>
+                            <p className="text-slate-500 text-sm mt-1">Ready to continue your journey?</p>
+                        </div>
+                        <button onClick={() => navigate('notifications')} className="relative p-2.5 bg-white rounded-full shadow-sm border border-slate-100 text-slate-600">
+                            <Icon name="Bell" size={20} />
+                            {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-brand-pink rounded-full border-2 border-white"></span>}
+                        </button>
+                    </div>
+                    <div className="px-6 space-y-6">
+                        <div className="bg-brand-dark text-white rounded-3xl p-6 shadow-lg relative overflow-hidden">
+                            <h2 className="text-sm font-medium text-slate-300 mb-4">MY PROGRESS</h2>
+                            <div className="flex items-end justify-between mb-4">
+                                <div className="text-4xl font-bold">{Math.round(percentage)}%</div>
+                                <div className="text-sm text-slate-300 bg-white/10 px-3 py-1 rounded-full">{completedCount}/{divisionCP.length} Checkpoints</div>
+                            </div>
+                            <ProgressBar percentage={percentage} />
+                        </div>
+                        {nextMission && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase px-2">Next Mission</h3>
+                                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 truncate">
+                                        <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-brand-pink shrink-0"><Icon name="Music" size={20} /></div>
+                                        <div className="truncate"><h4 className="font-semibold text-sm truncate">{nextMission.nama}</h4><p className="text-xs text-slate-500">Level {nextMission.level}</p></div>
+                                    </div>
+                                    <button onClick={() => navigate('progress')} className="text-xs font-semibold text-brand-pink bg-pink-50 px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1">Continue <Icon name="ArrowRight" size={12} /></button>
+                                </div>
+                            </div>
+                        )}
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase px-2 flex justify-between items-center"><span>Division Rank</span><Badge variant="purple">{user.divisi}</Badge></h3>
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                {rankings.map((m, idx) => (
+                                    <div key={m.id} className={`flex items-center gap-4 p-4 ${idx !== rankings.length - 1 ? 'border-b border-slate-50' : ''}`}>
+                                        <div className="w-6 text-center text-sm font-bold text-slate-400">{idx + 1}</div>
+                                        <Avatar src={m.foto_profil} name={m.nama_lengkap} size="sm" />
+                                        <div className="flex-1 min-w-0"><h4 className="font-semibold text-sm truncate">{m.nama_lengkap}</h4><p className="text-xs text-slate-500 truncate">@{m.username}</p></div>
+                                        <div className="text-sm font-bold bg-slate-50 px-2 py-1 rounded-lg">{Math.round(m.perc)}%</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ProgressView = ({ user, checkpoints, submissions, showToast, goalsMap, notifsMap }) => {
+            const [tab, setTab] = useState('journey');
+            const divisionCP = useMemo(() => checkpoints.filter(c => c.divisi === user.divisi), [checkpoints, user.divisi]);
+            const mySubs = useMemo(() => submissions.filter(s => s.user_id === user.id), [submissions, user.id]);
+            const [selectedCp, setSelectedCp] = useState(null);
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+            const myGoals = goalsMap[user.id] || [];
+            const [showGoalForm, setShowGoalForm] = useState(false);
+            const [editingGoalId, setEditingGoalId] = useState(null);
+            const [goalTitle, setGoalTitle] = useState('');
+            const [goalDesc, setGoalDesc] = useState('');
+
+            const handleSaveGoal = (e) => {
+                e.preventDefault();
+                if (!goalTitle.trim()) return showToast("Nama goal wajib diisi.", "error");
+                let updatedGoals = [...myGoals];
+                if (editingGoalId) {
+                    updatedGoals = updatedGoals.map(g => g.id === editingGoalId ? { ...g, title: goalTitle, description: goalDesc } : g);
+                } else {
+                    updatedGoals.push({ id: 'goal_' + Date.now(), title: goalTitle, description: goalDesc, progress: 0 });
+                }
+                setStorageData('goalsMap', { ...goalsMap, [user.id]: updatedGoals });
+                showToast("Goal berhasil disimpan!");
+                setShowGoalForm(false);
+                setEditingGoalId(null);
+                setGoalTitle('');
+                setGoalDesc('');
+            };
+
+            const updateGoalProg = (goalId, val) => {
+                const updatedGoals = myGoals.map(g => g.id === goalId ? { ...g, progress: val } : g);
+                setStorageData('goalsMap', { ...goalsMap, [user.id]: updatedGoals });
+            };
+
+            const deleteGoal = (goalId) => {
+                const updatedGoals = myGoals.filter(g => g.id !== goalId);
+                setStorageData('goalsMap', { ...goalsMap, [user.id]: updatedGoals });
+                showToast("Goal dihapus.");
+            };
+
+            const confirmSubmit = () => {
+                let subs = getStorageData('submissions', []);
+                if (subs.some(s => s.user_id === user.id && s.checkpoint_id === selectedCp.id && s.status === 'pending')) {
+                    return showToast("Checkpoint ini sudah diajukan.", "error");
+                }
+                subs.push({
+                    id: 'sub_' + Date.now(),
+                    user_id: user.id,
+                    user_name: user.nama_lengkap,
+                    user_username: user.username,
+                    user_kelas: user.kelas,
+                    user_divisi: user.divisi,
+                    checkpoint_id: selectedCp.id,
+                    checkpoint_name: selectedCp.nama,
+                    checkpoint_level: selectedCp.level,
+                    status: 'pending',
+                    submitted_at: Date.now()
+                });
+                setStorageData('submissions', subs);
+
+                let notifs = notifsMap[user.id] || [];
+                notifs.unshift({ id: 'notif_' + Date.now(), title: 'Checkpoint Diajukan', message: `Pengajuan "${selectedCp.nama}" sedang menunggu persetujuan admin.`, is_read: false, created_at: Date.now() });
+                setStorageData('notifsMap', { ...notifsMap, [user.id]: notifs });
+
+                showToast("Checkpoint berhasil diajukan!");
+                setSelectedCp(null);
+                setShowConfirmModal(false);
+            };
+
+            return (
+                <div className="fade-in pb-24">
+                    <TopBar title="Progress" />
+                    {selectedCp && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                            <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
+                                <button onClick={() => { setSelectedCp(null); setShowConfirmModal(false); }} className="absolute top-4 right-4 text-slate-400 bg-slate-50 rounded-full p-2"><Icon name="X" size={20} /></button>
+                                <Badge variant="purple">LEVEL {selectedCp.level}</Badge>
+                                <h2 className="text-xl font-bold mt-3 mb-2">{selectedCp.nama}</h2>
+                                <p className="text-xs text-slate-500 mb-6">Divisi {user.divisi}</p>
+                                
+                                {showConfirmModal ? (
+                                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 space-y-3">
+                                        <p className="text-sm font-semibold text-slate-800 text-center">Yakin ingin mengajukan checkpoint ini untuk disetujui?</p>
+                                        <div className="flex gap-2">
+                                            <Button variant="secondary" onClick={() => setShowConfirmModal(false)} className="flex-1">Tidak</Button>
+                                            <Button variant="accent" onClick={confirmSubmit} className="flex-1">Ya, Submit</Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Button onClick={() => setShowConfirmModal(true)}>Submit for Approval</Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="px-6 py-2 sticky top-16 bg-slate-50/90 backdrop-blur-md z-10">
+                        <div className="flex bg-slate-200/50 p-1 rounded-xl">
+                            <button onClick={() => setTab('journey')} className={`flex-1 py-2 text-sm font-medium rounded-lg ${tab === 'journey' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-500'}`}>Official Journey</button>
+                            <button onClick={() => setTab('goals')} className={`flex-1 py-2 text-sm font-medium rounded-lg ${tab === 'goals' ? 'bg-white shadow-sm text-brand-dark' : 'text-slate-500'}`}>My Goals</button>
+                        </div>
+                    </div>
+
+                    <div className="px-6 pt-4">
+                        {tab === 'journey' && (
+                            <div className="space-y-6">
+                                {[1, 2, 3].map(level => {
+                                    const cps = divisionCP.filter(c => c.level === level);
+                                    if (!cps.length) return null;
+                                    return (
+                                        <div key={level}>
+                                            <h3 className="font-bold text-slate-800 mb-3">LEVEL {level}</h3>
+                                            <div className="space-y-3">
+                                                {cps.map(cp => {
+                                                    const isDone = (user.progress || []).includes(cp.id);
+                                                    const pending = mySubs.some(s => s.checkpoint_id === cp.id && s.status === 'pending');
+                                                    const rejected = mySubs.some(s => s.checkpoint_id === cp.id && s.status === 'rejected');
+                                                    return (
+                                                        <div key={cp.id} onClick={() => !isDone && !pending && setSelectedCp(cp)} className={`bg-white p-4 rounded-2xl border flex justify-between items-center cursor-pointer ${isDone ? 'bg-emerald-50/30 border-emerald-100' : pending ? 'bg-amber-50/30 border-amber-100' : rejected ? 'bg-red-50/30 border-red-100' : 'border-slate-100'}`}>
+                                                            <div>
+                                                                <h4 className="font-semibold text-sm">{cp.nama}</h4>
+                                                                {rejected && <p className="text-[10px] text-red-500 mt-1">Ditolak, ketuk untuk ajukan ulang</p>}
+                                                            </div>
+                                                            <Badge variant={isDone ? 'success' : pending ? 'warning' : rejected ? 'danger' : 'default'}>{isDone ? 'Completed' : pending ? 'Pending' : rejected ? 'Rejected' : 'In Progress'}</Badge>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {tab === 'goals' && (
+                            <div className="space-y-4">
+                                {showGoalForm ? (
+                                    <form onSubmit={handleSaveGoal} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                        <h3 className="font-bold text-sm">{editingGoalId ? 'Edit Goal' : 'Buat Goal Baru'}</h3>
+                                        <Input label="Nama Goal" value={goalTitle} onChange={e => setGoalTitle(e.target.value)} placeholder="Contoh: Menguasai teknik solo gitar..." />
+                                        <div className="space-y-1.5">
+                                            <label className="block text-sm font-medium text-slate-700">Deskripsi (Opsional)</label>
+                                            <textarea value={goalDesc} onChange={e => setGoalDesc(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-brand-pink h-20"></textarea>
+                                        </div>
+                                        <div className="flex gap-2 pt-2">
+                                            <Button variant="ghost" type="button" onClick={() => { setShowGoalForm(false); setEditingGoalId(null); setGoalTitle(''); setGoalDesc(''); }}>Batal</Button>
+                                            <Button type="submit">Simpan</Button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <Button variant="secondary" onClick={() => { setEditingGoalId(null); setGoalTitle(''); setGoalDesc(''); setShowGoalForm(true); }} className="border-dashed border-2 text-brand-pink">
+                                        <Icon name="Plus" size={20} /> Add Goal
+                                    </Button>
+                                )}
+
+                                {myGoals.length === 0 && !showGoalForm ? (
+                                    <div className="text-center py-12 text-slate-400">
+                                        <Icon name="Target" size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p className="text-sm">Belum ada goal. Mulai buat target musikmu!</p>
+                                    </div>
+                                ) : (
+                                    myGoals.map(goal => (
+                                        <div key={goal.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h4 className="font-bold text-slate-800">{goal.title}</h4>
+                                                    {goal.description && <p className="text-xs text-slate-500 mt-0.5">{goal.description}</p>}
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => { setEditingGoalId(goal.id); setGoalTitle(goal.title); setGoalDesc(goal.description || ''); setShowGoalForm(true); }} className="text-slate-400 hover:text-brand-pink p-1"><Icon name="Edit2" size={16} /></button>
+                                                    <button onClick={() => deleteGoal(goal.id)} className="text-slate-400 hover:text-red-500 p-1"><Icon name="Trash2" size={16} /></button>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1"><ProgressBar percentage={goal.progress} /></div>
+                                                <span className="text-xs font-bold text-slate-600 w-8">{goal.progress}%</span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {[0, 25, 50, 75, 100].map(val => (
+                                                    <button key={val} onClick={() => updateGoalProg(goal.id, val)} className={`flex-1 py-1 rounded text-xs font-medium transition-colors ${goal.progress === val ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500'}`}>{val}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const FindFriendsView = ({ user, allUsers, navigate, follows, notifsMap, showToast }) => {
+            const [search, setSearch] = useState('');
+            const followingList = useMemo(() => follows.filter(f => f.follower_id === user.id).map(f => f.following_id), [follows, user.id]);
+
+            const results = useMemo(() => {
+                const query = search.toLowerCase().trim();
+                const members = allUsers.filter(u => u.role === 'member' && u.id !== user.id);
+                if (!query) return members;
+                return members.filter(u => (u.username && u.username.toLowerCase().includes(query)) || (u.nama_lengkap && u.nama_lengkap.toLowerCase().includes(query)));
+            }, [allUsers, search, user.id]);
+
+            const handleFollow = (targetId, targetName) => {
+                let fList = getStorageData('follows', []);
+                const isFollowed = followingList.includes(targetId);
+                if (isFollowed) {
+                    fList = fList.filter(f => !(f.follower_id === user.id && f.following_id === targetId));
+                    showToast("Berhasil berhenti mengikuti.");
+                } else {
+                    fList.push({ follower_id: user.id, following_id: targetId, created_at: Date.now() });
+                    
+                    let tNotifs = notifsMap[targetId] || [];
+                    tNotifs.unshift({ id: 'notif_' + Date.now(), title: 'Pengikut Baru', message: `@${user.username} mulai mengikuti Anda.`, is_read: false, created_at: Date.now() });
+                    setStorageData('notifsMap', { ...notifsMap, [targetId]: tNotifs });
+
+                    showToast(`Mulai mengikuti @${targetName}`);
+                }
+                setStorageData('follows', fList);
+            };
+
+            return (
+                <div className="fade-in pb-24">
+                    <div className="p-6 pb-2 glass-nav sticky top-0"><h1 className="text-2xl font-bold mb-4">Find Friends</h1><Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cari nama atau username..." icon="Search" /></div>
+                    <div className="px-6 pt-4 space-y-3">
+                        {results.length === 0 ? (
+                            <div className="text-center py-12 text-slate-400"><Icon name="Users" size={40} className="mx-auto mb-3 opacity-30" /><p className="text-sm">Tidak ada anggota yang ditemukan.</p></div>
+                        ) : (
+                            results.map(m => {
+                                const isF = followingList.includes(m.id);
+                                return (
+                                    <div key={m.id} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
+                                        <div onClick={() => { window.targetUserId = m.id; navigate('other_profile'); }} className="cursor-pointer shrink-0"><Avatar src={m.foto_profil} name={m.nama_lengkap} size="md" /></div>
+                                        <div className="flex-1 truncate cursor-pointer" onClick={() => { window.targetUserId = m.id; navigate('other_profile'); }}>
+                                            <h4 className="font-semibold text-sm truncate">{m.nama_lengkap}</h4>
+                                            <p className="text-xs text-slate-500 truncate">@{m.username}</p>
+                                        </div>
+                                        <button onClick={() => handleFollow(m.id, m.username)} className={`text-xs font-semibold px-4 py-2 rounded-full ${isF ? 'bg-slate-100 text-slate-600' : 'bg-brand-dark text-white'}`}>{isF ? 'Following' : 'Follow'}</button>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ProfileContent = ({ profileUser, isMe, navigate, logout, follows, checkpoints, showToast, allUsers }) => {
+            const [isEditing, setIsEditing] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [modalListType, setModalListType] = useState(null);
+            const [nama, setNama] = useState(profileUser.nama_lengkap);
+            const [kelas, setKelas] = useState(profileUser.kelas);
+            const [divisi, setDivisi] = useState(profileUser.divisi);
+            const [foto, setFoto] = useState(profileUser.foto_profil || '');
+
+            const fileRef = useRef(null);
+            const handleFile = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => setFoto(ev.target.result);
+                reader.readAsDataURL(file);
+            };
+
+            const handleSave = (e) => {
+                e.preventDefault();
+                let users = getStorageData('users', []);
+                users = users.map(u => u.id === profileUser.id ? { ...u, nama_lengkap: nama, kelas, divisi, foto_profil: foto } : u);
+                setStorageData('users', users);
+                showToast("Profil diperbarui!");
+                setIsEditing(false);
+            };
+
+            const handleDeleteAccount = () => {
+                let users = getStorageData('users', []).filter(u => u.id !== profileUser.id);
+                setStorageData('users', users);
+                showToast("Akun berhasil dihapus.");
+                logout();
+            };
+
+            const currentUser = getStorageData('current_user', null);
+            const myFollowingList = useMemo(() => follows.filter(f => f.follower_id === currentUser?.id).map(f => f.following_id), [follows, currentUser]);
+            const isFollowedByMe = myFollowingList.includes(profileUser.id);
+
+            const handleToggleFollow = () => {
+                if (!currentUser) return;
+                let fList = getStorageData('follows', []);
+                if (isFollowedByMe) {
+                    fList = fList.filter(f => !(f.follower_id === currentUser.id && f.following_id === profileUser.id));
+                    showToast("Berhasil berhenti mengikuti.");
+                } else {
+                    fList.push({ follower_id: currentUser.id, following_id: profileUser.id, created_at: Date.now() });
+                    showToast(`Mulai mengikuti @${profileUser.username}`);
+                }
+                setStorageData('follows', fList);
+            };
+
+            const followersIds = follows.filter(f => f.following_id === profileUser.id).map(f => f.follower_id);
+            const followingIds = follows.filter(f => f.follower_id === profileUser.id).map(f => f.following_id);
+
+            const followersUsers = allUsers.filter(u => followersIds.includes(u.id));
+            const followingUsers = allUsers.filter(u => followingIds.includes(u.id));
+
+            const completedCP = (profileUser.progress || []).length;
+            const badges = profileUser.badges || ['FIRST STEP'];
+
+            return (
+                <div className="fade-in pb-24">
+                    {isMe ? <TopBar title="My Profile" rightElement={<button onClick={logout} className="text-red-500"><Icon name="LogOut" size={20}/></button>} /> : <TopBar title={profileUser.username} onBack={() => navigate('find_friends')} />}
+                    
+                    {modalListType && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                            <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative max-h-[80vh] flex flex-col">
+                                <button onClick={() => setModalListType(null)} className="absolute top-4 right-4 text-slate-400 bg-slate-50 rounded-full p-2"><Icon name="X" size={20} /></button>
+                                <h3 className="font-bold text-lg mb-4 capitalize">{modalListType}</h3>
+                                <div className="space-y-3 overflow-y-auto flex-1 pr-1">
+                                    {(modalListType === 'followers' ? followersUsers : followingUsers).length === 0 ? (
+                                        <p className="text-center text-slate-400 py-8 text-sm">Tidak ada daftar.</p>
+                                    ) : (
+                                        (modalListType === 'followers' ? followersUsers : followingUsers).map(u => (
+                                            <div key={u.id} onClick={() => { setModalListType(null); window.targetUserId = u.id; navigate('other_profile'); }} className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100">
+                                                <Avatar src={u.foto_profil} name={u.nama_lengkap} size="sm" />
+                                                <div className="flex-1 truncate"><h4 className="font-semibold text-sm truncate">{u.nama_lengkap}</h4><p className="text-xs text-slate-500 truncate">@{u.username}</p></div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {isEditing && isMe && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                            <form onSubmit={handleSave} className="bg-white rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+                                <h3 className="font-bold text-lg">Edit Profil</h3>
+                                <div className="flex flex-col items-center gap-2">
+                                    <Avatar src={foto} name={nama} size="lg" />
+                                    <input type="file" ref={fileRef} onChange={handleFile} accept="image/*" className="hidden" />
+                                    <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()} className="text-xs py-2 w-auto">Ganti Foto</Button>
+                                </div>
+                                <Input label="Nama" value={nama} onChange={e => setNama(e.target.value)} />
+                                <Input label="Kelas" value={kelas} onChange={e => setKelas(e.target.value)} />
+                                <Select label="Divisi" value={divisi} onChange={e => setDivisi(e.target.value)} options={['Vokal', 'Gitar', 'Bass', 'Drum', 'Dance']} />
+                                <div className="flex gap-2 pt-2"><Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Batal</Button><Button type="submit">Simpan</Button></div>
+                            </form>
+                        </div>
+                    )}
+
+                    {showDeleteModal && isMe && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                            <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+                                <h3 className="font-bold text-lg text-slate-800">Yakin ingin menghapus akun?</h3>
+                                <p className="text-xs text-slate-500 leading-relaxed">Semua data akun, progress, goals, dan pencapaianmu akan dihapus secara permanen.</p>
+                                <div className="flex gap-2 pt-2">
+                                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">Batal</Button>
+                                    <Button variant="danger" onClick={handleDeleteAccount} className="flex-1">Hapus</Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="px-6 pt-6 flex flex-col items-center">
+                        <Avatar src={profileUser.foto_profil} name={profileUser.nama_lengkap} size="xl" />
+                        <h2 className="text-xl font-bold mt-4">{profileUser.nama_lengkap}</h2>
+                        <p className="text-slate-500 text-sm">@{profileUser.username} • {profileUser.kelas}</p>
+                        <Badge variant="pink" className="mt-2">{profileUser.divisi}</Badge>
+
+                        <div className="flex w-full mt-6 gap-4">
+                            <div className="flex-1 text-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm"><div className="text-lg font-bold">{completedCP}</div><div className="text-[10px] uppercase text-slate-400 font-bold">Checkpoints</div></div>
+                            <div onClick={() => setModalListType('followers')} className="flex-1 text-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50"><div className="text-lg font-bold">{followersIds.length}</div><div className="text-[10px] uppercase text-slate-400 font-bold">Followers</div></div>
+                            <div onClick={() => setModalListType('following')} className="flex-1 text-center bg-white p-3 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50"><div className="text-lg font-bold">{followingIds.length}</div><div className="text-[10px] uppercase text-slate-400 font-bold">Following</div></div>
+                        </div>
+
+                        {isMe ? (
+                            <div className="w-full mt-6 space-y-3">
+                                <Button variant="secondary" onClick={() => setIsEditing(true)}>Edit Profile</Button>
+                                <Button variant="danger" onClick={() => setShowDeleteModal(true)} className="text-xs py-2.5">Delete Account</Button>
+                            </div>
+                        ) : (
+                            <div className="w-full mt-6">
+                                <Button onClick={handleToggleFollow} variant={isFollowedByMe ? "secondary" : "accent"}>{isFollowedByMe ? "Following" : "Follow"}</Button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="px-6 mt-8 space-y-4">
+                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide">Achievements</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                            {badges.map(b => (
+                                <div key={b} className="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-pink-100 text-brand-pink flex items-center justify-center"><Icon name="Zap" size={16} /></div>
+                                    <span className="text-xs font-bold text-slate-700">{b}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {isMe && (
+                        <div className="mt-16 px-6 text-center pb-8 opacity-80">
+                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400"><Icon name="Heart" size={16} /></div>
+                            <h3 className="text-sm font-bold mb-2 text-slate-700">Thank You for Being Part of Music Journey ♡</h3>
+                            <p className="text-[11px] leading-relaxed text-slate-500 mb-3">Thank you for being part of Music Journey. This app was created to make every step of your musical journey feel more meaningful...</p>
+                            <div className="text-[10px] font-medium text-slate-400">
+                                Made with love by Dara Sabrina<br/>
+                                <a href="https://instagram.com/___sbreena" target="_blank" className="text-brand-pink hover:underline mt-1 inline-block">Instagram: @___sbreena</a>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const MyProfileView = ({ user, logout, showToast, navigate, follows, checkpoints, allUsers }) => <ProfileContent profileUser={user} isMe={true} navigate={navigate} logout={logout} follows={follows} checkpoints={checkpoints} showToast={showToast} allUsers={allUsers} />;
+        
+        const OtherProfileView = ({ currentUser, targetUser, navigate, checkpoints, follows, showToast, allUsers }) => {
+            if (!targetUser) return <div className="p-8 text-center">User not found</div>;
+            return <ProfileContent profileUser={targetUser} isMe={false} navigate={navigate} follows={follows} checkpoints={checkpoints} showToast={showToast} allUsers={allUsers} />;
+        };
+
+        const NotificationsView = ({ user, navigate, notifsMap }) => {
+            const notifs = notifsMap[user.id] || [];
+
+            const markAllRead = () => {
+                const updated = notifs.map(n => ({ ...n, is_read: true }));
+                setStorageData('notifsMap', { ...notifsMap, [user.id]: updated });
+            };
+
+            const formatTime = (ts) => {
+                const diff = Date.now() - ts;
+                if(diff < 60000) return 'Baru saja';
+                if(diff < 3600000) return `${Math.floor(diff/60000)}m yang lalu`;
+                if(diff < 86400000) return `${Math.floor(diff/3600000)}j yang lalu`;
+                return new Date(ts).toLocaleDateString();
+            };
+
+            return (
+                <div className="fade-in pb-24 bg-slate-50 min-h-full">
+                    <TopBar title="Notifications" onBack={() => navigate('dashboard')} />
+                    <div className="px-6 py-4 flex justify-between items-center">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-wide">Terbaru</span>
+                        {notifs.some(n => !n.is_read) && (
+                            <button onClick={markAllRead} className="text-xs font-semibold text-brand-pink hover:underline">Mark all as read</button>
+                        )}
+                    </div>
+                    <div className="px-6 space-y-3">
+                        {notifs.length === 0 ? (
+                            <div className="text-center py-12 text-slate-400">
+                                <Icon name="BellOff" size={40} className="mx-auto mb-3 opacity-30" />
+                                <p className="text-sm">Tidak ada notifikasi baru.</p>
+                            </div>
+                        ) : (
+                            notifs.map(n => (
+                                <div key={n.id} className={`p-4 rounded-2xl flex gap-4 items-start ${n.is_read ? 'bg-white border border-slate-100 shadow-sm opacity-75' : 'bg-pink-50 border border-pink-100 shadow-sm'}`}>
+                                    <div className="w-10 h-10 rounded-full bg-pink-100 text-brand-pink flex items-center justify-center shrink-0">
+                                        <Icon name="Bell" size={20} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className={`text-sm ${n.is_read ? 'font-medium text-slate-700' : 'font-bold text-slate-900'}`}>{n.title}</h4>
+                                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">{n.message}</p>
+                                        <p className="text-[10px] text-slate-400 mt-2">{formatTime(n.created_at)}</p>
+                                    </div>
+                                    {!n.is_read && <div className="w-2 h-2 rounded-full bg-brand-pink mt-2 shrink-0"></div>}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminBottomNav = ({ view, navigate }) => {
+            const items = [{ id: 'admin_dashboard', icon: 'LayoutDashboard', label: 'Home' }, { id: 'admin_members', icon: 'Users', label: 'Members' }, { id: 'admin_checkpoints', icon: 'ListChecks', label: 'CP' }, { id: 'admin_approvals', icon: 'CheckCircle', label: 'Approvals' }, { id: 'admin_profile', icon: 'Settings', label: 'Settings' }];
+            return (
+                <div className="absolute bottom-0 left-0 right-0 w-full bg-slate-900 text-slate-400 pb-safe pt-2 px-6 pb-4 sm:rounded-b-3xl z-30">
+                    <div className="flex justify-between items-center max-w-sm mx-auto">
+                        {items.map(item => (
+                            <button key={item.id} onClick={() => navigate(item.id)} className={`flex flex-col items-center gap-1 p-2 ${view === item.id ? 'text-white' : 'hover:text-slate-200'}`}>
+                                <Icon name={item.icon} size={22} />
+                                <span className="text-[10px] font-medium">{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminDashboard = ({ allUsers, checkpoints }) => {
+            const members = allUsers.filter(u => u.role === 'member');
+            return (
+                <div className="fade-in pb-24 bg-slate-50 min-h-full">
+                    <div className="bg-slate-900 text-white pt-8 pb-12 px-6"><h1 className="text-2xl font-bold">Admin Workspace</h1><p className="text-slate-400 text-sm">Selamat datang, Admin.</p></div>
+                    <div className="-mt-6 px-6 grid grid-cols-2 gap-4">
+                        <div className="bg-white p-5 rounded-2xl shadow-sm text-center"><div className="text-3xl font-bold mb-1">{members.length}</div><div className="text-xs text-slate-500 uppercase">Members</div></div>
+                        <div className="bg-white p-5 rounded-2xl shadow-sm text-center"><div className="text-3xl font-bold mb-1">{checkpoints.length}</div><div className="text-xs text-slate-500 uppercase">Checkpoints</div></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminMembers = ({ allUsers, navigate }) => {
+            const members = allUsers.filter(u => u.role === 'member');
+            return (
+                <div className="fade-in pb-24">
+                    <TopBar title="Manage Members" />
+                    <div className="px-6 pt-4 space-y-3">
+                        {members.length === 0 ? (
+                            <p className="text-center text-slate-400 py-8 text-sm">Belum ada member terdaftar.</p>
+                        ) : (
+                            members.map(m => (
+                                <div key={m.id} onClick={() => { window.targetUserId = m.id; navigate('admin_member_detail'); }} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-4 cursor-pointer hover:bg-slate-50">
+                                    <Avatar src={m.foto_profil} name={m.nama_lengkap} size="md" />
+                                    <div className="flex-1 truncate"><h4 className="font-semibold text-sm">{m.nama_lengkap}</h4><p className="text-xs text-slate-500">@{m.username}</p></div>
+                                    <Badge>{m.divisi}</Badge>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminMemberDetail = ({ user, navigate, checkpoints }) => {
+            if (!user) return null;
+            const total = checkpoints.filter(c => c.divisi === user.divisi).length;
+            const done = (user.progress || []).length;
+            return (
+                <div className="fade-in pb-24">
+                    <TopBar title="Detail Member" onBack={() => navigate('admin_members')} />
+                    <div className="px-6 pt-6 flex flex-col items-center">
+                        <Avatar src={user.foto_profil} name={user.nama_lengkap} size="xl" />
+                        <h2 className="text-xl font-bold mt-4">{user.nama_lengkap}</h2>
+                        <p className="text-slate-500 text-sm">@{user.username} • {user.kelas}</p>
+                        <Badge variant="purple" className="mt-2">{user.divisi}</Badge>
+                        <div className="w-full mt-6 bg-slate-900 text-white p-5 rounded-2xl"><div className="flex justify-between text-sm mb-2"><span>Progress</span><span>{done}/{total}</span></div><ProgressBar percentage={total ? (done/total)*100 : 0} /></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminCheckpoints = ({ checkpoints }) => (
+            <div className="fade-in pb-24"><TopBar title="Checkpoints" /><div className="px-6 pt-4 space-y-3">{checkpoints.map(c => <div key={c.id} className="bg-white p-4 rounded-2xl border"><h4 className="font-semibold text-sm">{c.nama}</h4><Badge>{c.divisi} - Level {c.level}</Badge></div>)}</div></div>
+        );
+
+        const AdminApprovals = ({ submissions, allUsers, showToast, notifsMap }) => {
+            const pending = submissions.filter(s => s.status === 'pending');
+
+            const handleApprove = (sub) => {
+                let subs = getStorageData('submissions', []).map(s => s.id === sub.id ? { ...s, status: 'approved' } : s);
+                setStorageData('submissions', subs);
+
+                let users = getStorageData('users', []);
+                users = users.map(u => {
+                    if (u.id === sub.user_id) {
+                        const prog = u.progress || [];
+                        if (!prog.includes(sub.checkpoint_id)) prog.push(sub.checkpoint_id);
+                        let badges = u.badges || ['FIRST STEP'];
+                        if (prog.length >= 4 && !badges.includes('ACTIVE MEMBER')) badges.push('ACTIVE MEMBER');
+                        return { ...u, progress: prog, badges };
+                    }
+                    return u;
+                });
+                setStorageData('users', users);
+
+                let notifs = notifsMap[sub.user_id] || [];
+                notifs.unshift({ id: 'notif_' + Date.now(), title: 'Checkpoint Disetujui! 🎉', message: `Checkpoint "${sub.checkpoint_name}" telah disetujui oleh admin.`, is_read: false, created_at: Date.now() });
+                setStorageData('notifsMap', { ...notifsMap, [sub.user_id]: notifs });
+
+                showToast("Pengajuan disetujui!");
+            };
+
+            const handleReject = (sub) => {
+                let subs = getStorageData('submissions', []).map(s => s.id === sub.id ? { ...s, status: 'rejected' } : s);
+                setStorageData('submissions', subs);
+
+                let notifs = notifsMap[sub.user_id] || [];
+                notifs.unshift({ id: 'notif_' + Date.now(), title: 'Checkpoint Ditolak', message: `Checkpoint "${sub.checkpoint_name}" ditolak. Silakan periksa kembali.`, is_read: false, created_at: Date.now() });
+                setStorageData('notifsMap', { ...notifsMap, [sub.user_id]: notifs });
+
+                showToast("Pengajuan ditolak.");
+            };
+
+            return (
+                <div className="fade-in pb-24">
+                    <TopBar title="Approvals" />
+                    <div className="px-6 pt-4 space-y-3">
+                        {pending.length === 0 ? <p className="text-center text-slate-400 py-8">Tidak ada pengajuan pending.</p> : pending.map(s => (
+                            <div key={s.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                <div><h4 className="font-bold text-sm">{s.user_name}</h4><p className="text-xs text-brand-pink font-medium">{s.checkpoint_name}</p><p className="text-[10px] text-slate-400">{s.user_divisi} - {s.user_kelas}</p></div>
+                                <div className="flex gap-2"><Button variant="danger" onClick={() => handleReject(s)} className="text-xs py-2">Tolak</Button><Button onClick={() => handleApprove(s)} className="text-xs py-2">Setujui</Button></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminProfile = ({ user, logout }) => (
+            <div className="fade-in h-full flex flex-col">
+                <TopBar title="Settings" />
+                <div className="p-6 flex flex-col items-center flex-1">
+                    <Avatar name={user.nama_lengkap} size="xl" />
+                    <h2 className="text-xl font-bold mt-4">{user.nama_lengkap}</h2>
+                    <Badge variant="purple" className="mt-2">Administrator</Badge>
+                    <div className="w-full mt-12"><Button variant="danger" onClick={logout}><Icon name="LogOut" size={20} /> Keluar Aplikasi</Button></div>
+                </div>
+            </div>
+        );
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
